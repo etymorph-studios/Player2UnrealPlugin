@@ -33,7 +33,7 @@ namespace P2
 		if (UWorld* World = GEngine->GetWorldFromContextObject(Context, EGetWorldErrorMode::ReturnNull); World != nullptr)
 		{
 			UP2Subsystem* subsystem = World->GetGameInstance()->GetSubsystem<UP2Subsystem>();
-			LocalHostRunning = subsystem->GetP2Login()->IsPlayer2RunningLocally();
+			LocalHostRunning = (subsystem->GetP2Login()->GetPlayer2AuthenticationMode() == EP2AuthentMode::Local);
 		}
 
 		if (LocalHostRunning)

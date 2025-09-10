@@ -4,6 +4,7 @@
 #include "Rest/P2RestSystem.h"
 #include "Core/P2Logger.h"
 #include "Core/P2Subsystem.h"
+#include "Rest/P2Login.h"
 
 void UP2RequestSystem::OnRequestComplete(EP2SResponseCode Code, const FString& Content)
 {
@@ -14,7 +15,10 @@ void UP2RequestSystem::OnRequestComplete(EP2SResponseCode Code, const FString& C
 		TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(Content);
 		if (FJsonSerializer::Deserialize(Reader, JsonObject) && JsonObject.IsValid())
 		{
-			Health.ParseJson(JsonObject);
+			if (!Health.ParseJson(JsonObject))
+			{
+				Health.client_version = TEXT("0.0");
+			}
 		}
 		else
 		{
@@ -49,7 +53,21 @@ UP2RequestSystem* UP2RestSystem::RequestSystemHealth()
 	NewRequest->SetVerb(TEXT("GET"));
 	NewRequest->SetHeader(TEXT("accept"), TEXT("application/json; charset=utf-8"));
 	NewRequest->SetHeader(P2::HeaderPlayer2GameKey, P2::GetPlayer2GameKey(P2Subsystem));
-	//NewRequest->SetHeader(TEXT("p2Key"), P2Subsystem->GetClientP2Key());
+	//NewRequest->SetHeader(TEXT("p2Key"), P2Subsystem->GetP2Login()->GetClientP2Key());
+
+	switch(P2Subsystem->GetP2Login()->GetPlayer2AuthenticationMode())
+	{
+		case EP2AuthentMode::Local: break;
+		case EP2AuthentMode::Bearer: 
+			P2_LOG_V(TEXT("Adding bearer key to system health call"));
+			//NewRequest->SetContentAsString(FString::Printf(TEXT("{\"bearer\":\"%s\"}"), *P2Subsystem->GetP2Login()->GetClientP2Key()));
+
+			//NewRequest->SetHeader(TEXT("bearer"), P2Subsystem->GetP2Login()->GetClientP2Key());
+			NewRequest->SetHeader(TEXT("Authorization"), FString::Printf(TEXT("Bearer %s"),*P2Subsystem->GetP2Login()->GetClientP2Key()));
+			break;
+		case EP2AuthentMode::ApiToken: break;
+	}
+
 	Request->InsertHttpPointer(NewRequest);
 	
 

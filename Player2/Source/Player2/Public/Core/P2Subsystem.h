@@ -17,6 +17,9 @@ class UP2Login;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnP2SystemChange);
 
+
+/// This subsystem handles the overhead of starting up player2 services.
+/// Also, this class acts as the hub for both events and data to be stored with respect to player2 functionality.
 UCLASS(Category = "Player2", Config = Game, defaultconfig, meta = (DisplayName = "Player2 Subsystem"))
 class PLAYER2_API UP2Subsystem : public UGameInstanceSubsystem
 {
@@ -27,23 +30,15 @@ public:
 	UPROPERTY(BlueprintAssignable) FOnP2SystemChange OnSystemHealthChange;
 	void UpdateRequestSystem(UP2RequestSystem* LastRequest);
 
-	/// Bind to be notify when the client key has been changed.
-	UPROPERTY(BlueprintAssignable) FOnP2SystemChange OnClientLoginStatusUpdate;
+	/// Bind to be notify when the client key has been either authenticated or unauthenticated.
+	/// Listen to UP2Login events for more fine grain status updates. 
+	UPROPERTY(BlueprintAssignable) FOnP2SystemChange OnClientLoginAuthenticationUpdate;
 
 
 	/// @return true if player2 is alive and healthy for requests.
 	UFUNCTION(BlueprintPure) bool IsPlayer2Healthy() const;
 
-	
 	UFUNCTION(BlueprintPure) UP2Login* GetP2Login() const;
-
-
-
-
-
-
-
-
 
 
 	/// @return true if the request was sent out.
@@ -57,15 +52,16 @@ private:
 	FTimerHandle HandleForSystemHeartbeat;
 
 	
-	UFUNCTION() void OnLoginStatusChanged(UP2Login* Login);
+	UFUNCTION() void OnLoginStatusChanged(UP2Login* Login, bool IsAuthenticated);
 
 
 	/// List of REST proxies.
 	UPROPERTY() TArray<TObjectPtr<UP2RestBase>> RestEndpoints;
 	
+	/// Contains the last interaction with the system health API.
 	UPROPERTY(Transient) UP2RequestSystem* LastRequestSystem { nullptr };
-	UPROPERTY(Transient) UP2RequestClientP2Key* LastRequestClientKey { nullptr };
 
+	
 	UPROPERTY(Transient) UP2Login* P2Login { nullptr };
 
 

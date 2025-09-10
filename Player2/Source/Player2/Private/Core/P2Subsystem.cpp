@@ -4,6 +4,7 @@
 
 #include "Core/P2Subsystem.h"
 #include "Core/P2Logger.h"
+#include "Core/P2Cache.h"
 #include "Rest/P2RestSystem.h"
 #include "Rest/P2RestWebAPI.h"
 #include "Rest/P2Login.h"
@@ -18,7 +19,6 @@ void UP2Subsystem::Initialize(FSubsystemCollectionBase& Collection)
 	RestEndpoints.Add(UP2RestBase::CreateRest<UP2RestWeb>(this));
 
 	P2Login = NewObject<UP2Login>();
-	P2Login->P2Subsystem = this;
 
 	//P2Login->OnP2LoginStatusChange.BindUObject(this, &UP2Subsystem::OnSystemHealthHeartbeat);
 
@@ -30,7 +30,11 @@ void UP2Subsystem::Initialize(FSubsystemCollectionBase& Collection)
 
 void UP2Subsystem::InitDelayNext()
 {
-	P2Login->InitStartup();
+	UP2Cache::InitSaveFile();
+
+	FOnP2LoginAuthenticated Delegate;
+	Delegate.BindUObject(this, &UP2Subsystem::OnLoginStatusChanged);
+	P2Login->InitStartup(this, MoveTemp(Delegate));
 }
 
 void UP2Subsystem::Deinitialize()
@@ -91,6 +95,7 @@ void UP2Subsystem::UpdateRequestSystem(class UP2RequestSystem* LastRequest)
 	{
 		OnSystemHealthChange.Broadcast();
 	}
+	P2_LOG_V( TEXT("Player2 system is %s"), (IsPlayer2Healthy() ? TEXT("healthy") : TEXT("not healthy")) );
 }
 
 
@@ -99,14 +104,14 @@ UP2Login* UP2Subsystem::GetP2Login() const
 	return P2Login;
 }
 
-void UP2Subsystem::OnLoginStatusChanged(UP2Login* Login)
+void UP2Subsystem::OnLoginStatusChanged(UP2Login* Login, bool IsAuthenticated)
 {
 	check(Login != nullptr);
 	if (!IsPlayer2Healthy() && !Login->GetClientP2Key().IsEmpty())
 	{
 		OnSystemHealthHeartbeat();
 	}
-	OnClientLoginStatusUpdate.Broadcast();
+	OnClientLoginAuthenticationUpdate.Broadcast();
 }
 
 

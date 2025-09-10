@@ -41,6 +41,18 @@ enum class EP2SResponseCode : uint8 {
 	Undefined
 };
 
+/// The state in which player2 can function. Local instance will take precedence, otherwise alternatives will be attempted.
+UENUM(BlueprintType, Category = "Player2")
+enum class EP2AuthentMode : uint8
+{
+	/// Local instance running on machine.
+	Local,
+	/// The API key received from the Player2 redirect page.
+	Bearer,
+	/// Not defined
+	ApiToken,
+	Undefined
+};
 
 
 namespace P2

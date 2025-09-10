@@ -15,7 +15,25 @@ class UP2RequestClientP2Key;
 class UP2RequestLoginDevice;
 class UP2Subsystem;
 
-DECLARE_DELEGATE_OneParam(FOnP2LoginStatusChange, class UP2Login*);
+/// Events that could cause the status calls
+UENUM(BlueprintType, Category = "Player2")
+enum class EP2LoginStatusChange : uint8
+{
+	/// Routine To Start up.
+	StartUp,
+	/// The login was successful
+	Authenticated,
+	/// The login was not successful
+	Unauthenticated,
+	/// The user is required to login through 3rd party
+	UserLogin,
+	/// If the user took to long to sign in
+	Timeout,
+	Undefined
+};
+
+DECLARE_DELEGATE_TwoParams(FOnP2LoginAuthenticated, class UP2Login*, bool /*AuthenticatedFlag*/);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnP2LoginStatusChange, class UP2Login*, caller, EP2LoginStatusChange, Event);
 
 UCLASS(Category = "Player2")
 class PLAYER2_API UP2Login : public UObject
@@ -24,14 +42,18 @@ class PLAYER2_API UP2Login : public UObject
 
 public:
 	
+	/// Attach UI to these events to showcase current login states.
+	UPROPERTY(BlueprintAssignable) FOnP2LoginStatusChange OnP2LoginStatusChange;
 	
-	void InitStartup();
+	void InitStartup(UObject* Caller, FOnP2LoginAuthenticated AuthenticationEvent);
 
 	/// Checks if we are currently requesting client keys.
 	UFUNCTION(BlueprintPure) bool IsCurrentlyRequestingClientKeys() const;
 
-	/// Checks if the client has a local process of Player2 running in the background.
-	UFUNCTION(BlueprintPure) bool IsPlayer2RunningLocally() const;
+	/// Checks what instance of player2 to use.
+	UFUNCTION(BlueprintPure) EP2AuthentMode GetPlayer2AuthenticationMode() const;
+
+
 
 	/// @return the player2 key if it exist, otherwise the result will be empty.
 	UFUNCTION(BlueprintPure) FString GetClientP2Key() const;
@@ -50,9 +72,8 @@ public:
 
 
 protected:
-	friend UP2Subsystem;
-	FOnP2LoginStatusChange OnP2LoginStatusChange;
 	UP2Subsystem* P2Subsystem{ nullptr };
+	FOnP2LoginAuthenticated OnP2LoginAuthenticated;
 
 private:
 	UPROPERTY(Transient) UP2RequestClientP2Key* ClientKeyObj { nullptr };
@@ -68,16 +89,20 @@ private:
 	UFUNCTION() void OnStartUpLoginComplete(UP2Request* Response);
 
 
+	void StopPoolingForAuthDeviceInternal();
 
 
 	struct FPoolingInfo {
 		FTimerHandle TimerHandle;
 		FP2SchemaAuthFlow AuthFlow;
 		double StartTime{ -1 };
+		UP2RequestClientP2Key* TargetRequester{ nullptr };
 	};
 	FPoolingInfo AuthPoolingInfo;
 
 	UFUNCTION() void OnPollForDeviceNew();
+	UFUNCTION() void OnCompletePollDeviceRequest(UP2Request* Response);
+
 
 };
 
