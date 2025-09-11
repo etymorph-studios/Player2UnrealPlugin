@@ -19,6 +19,4 @@ public:
 	/// Unique Key (typically the game name) used to reference the application when calling the Player2 API.
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, AdvancedDisplay) FString HeaderPlayer2GameKey;
 
-	/// The listening address used to catch Player2 Authorization Code Flow hook call
-	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, AdvancedDisplay) FString HookAuthorizationURL;
 };

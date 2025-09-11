@@ -14,6 +14,8 @@ class PLAYER2_API UPlayer2BPLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_UCLASS_BODY()
 
+	UFUNCTION(BlueprintPure, Category = "Player2|Library") static FString GetPlayer2PluginVersion();
+
 	/// Checks if there is an active connection with the player2 client.
 	UFUNCTION(BlueprintPure, Category = "Player2|Library", meta = (WorldContext = "WorldContextObject"))
 	static bool IsPlayer2Healthy(UObject* WorldContextObject);

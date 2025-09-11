@@ -3,10 +3,14 @@
 
 #include "Game/Player2BPLibrary.h"
 #include "Core/P2Subsystem.h"
+#include "Core/P2GenericInfo.h"
 
 UPlayer2BPLibrary::UPlayer2BPLibrary(const FObjectInitializer& ObjectInitializer): Super(ObjectInitializer){}
 
-
+FString UPlayer2BPLibrary::GetPlayer2PluginVersion()
+{
+	return P2::PluginVersion();
+}
 
 bool UPlayer2BPLibrary::IsPlayer2Healthy(UObject* WorldContextObject)
 {

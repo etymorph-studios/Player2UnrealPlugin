@@ -254,9 +254,10 @@ void UP2Login::OnPollForDeviceNew()
 {
 	checkf(AuthPoolingInfo.TargetRequester == nullptr, TEXT("Should not poll a new request as we are already waiting on the last poll response."));
 
-
-	if (AuthPoolingInfo.StartTime + AuthPoolingInfo.AuthFlow.expiresIn < FDateTime::UtcNow().ToUnixTimestampDecimal())
+	P2_LOG_VV(TEXT("Time Left to Authentication: %f"), (AuthPoolingInfo.StartTime + AuthPoolingInfo.AuthFlow.expiresIn - FDateTime::UtcNow().ToUnixTimestampDecimal()));
+	if ( (AuthPoolingInfo.StartTime + AuthPoolingInfo.AuthFlow.expiresIn) < FDateTime::UtcNow().ToUnixTimestampDecimal())
 	{
+		P2_LOG_V(TEXT("Timeout for New Device"));
 		StopPoolingForAuthDeviceInternal();
 		OnP2LoginAuthenticated.ExecuteIfBound(this, false);
 		OnP2LoginStatusChange.Broadcast(this, EP2LoginStatusChange::Timeout);

@@ -6,6 +6,14 @@
 #include "UObject/NoExportTypes.h"
 #include "P2GenericInfo.generated.h"
 
+namespace P2
+{
+	void PluginVersion(int32& Major, int32& Minor, int32& Patch);
+	FString PluginVersion();
+
+	FString JsonToString(const TSharedPtr<FJsonObject>& JsonObj);
+}
+
 
 /// Placeholder. Used with blueprints, to give expressive results.
 UENUM(BlueprintType, Category = "Player2")
@@ -55,7 +63,3 @@ enum class EP2AuthentMode : uint8
 };
 
 
-namespace P2
-{
-	FString JsonToString(const TSharedPtr<FJsonObject>& JsonObj);
-}

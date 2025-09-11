@@ -5,7 +5,9 @@ This plugin is designed to simplify the integration of the Player2 SDK within Un
 
 ## Example
 
-A full guide is WIP. However there is a demo level and assets found inside the plugin context folder. These components showcase how to use the plugin.
+The Example Level can be found inside the UE Content Browser, All/Plugins/Player2 Content/Demo/P2_Demo_Level
+
+Open the level to play it. The level will showcase the login screen for Player2 and any future features. Components used in this level will showcase and document features with this Player2 plugin.
 
 ## BUILD
 
